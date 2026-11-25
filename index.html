@@ -160,6 +160,7 @@ const LANGS=[
   {k:'urdu',n:'اردو',e:'Urdu'},{k:'odia',n:'ଓଡ଼ିଆ',e:'Odia'},{k:'bhojpuri',n:'भोजपुरी',e:'Bhojpuri'},
   {k:'konkani',n:'कोंकणी',e:'Konkani'},{k:'assamese',n:'অসমীয়া',e:'Assamese'},{k:'sanskrit',n:'संस्कृतम्',e:'Devotional'}
 ];
+const ALIAS={odia:['odia','oriya'],bengali:['bengali','bangla'],gujarati:['gujarati','gujrati'],sanskrit:['sanskrit','bhakti'],punjabi:['punjabi','panjabi']};
 const MIRRORS=['https://de1.api.radio-browser.info','https://de2.api.radio-browser.info','https://fi1.api.radio-browser.info','https://nl1.api.radio-browser.info','https://at1.api.radio-browser.info','https://all.api.radio-browser.info'];
 const ICON={play:'<path d="M8 5v14l11-7z"/>',pause:'<path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/>',load:'<path d="M12 4a8 8 0 1 0 8 8h-2.2A5.8 5.8 0 1 1 12 6.2z"/>'};
 const STAR='<svg class="mark" viewBox="0 0 24 24" aria-label="Favourite"><path d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z"/></svg>';
@@ -187,9 +188,15 @@ async function api(path){
 
 async function loadLang(k){
   if(cache[k])return cache[k];
-  const saved=store.get('c_'+k,null);
+  const saved=store.get('c2_'+k,null);
   if(saved&&Date.now()-saved.t<6*3600e3){cache[k]=saved.d;return saved.d}
-  const raw=await api(`/json/stations/search?language=${encodeURIComponent(k)}&hidebroken=true&order=clickcount&reverse=true&limit=250`);
+  // Stations are labelled inconsistently, so search language, tag and name, with alternate spellings
+  const terms=ALIAS[k]||[k],q=[];
+  for(const t of terms)for(const f of ['language','tag','name'])q.push(api(`/json/stations/search?${f}=${encodeURIComponent(t)}&hidebroken=true&order=clickcount&reverse=true&limit=250`).catch(()=>[]));
+  const res=await Promise.all(q);
+  if(res.every(r=>!r.length)&&!(await api('/json/stats').catch(()=>null)))throw new Error('unreachable');
+  const byId=new Map();res.flat().forEach(s=>{if(s&&s.stationuuid&&!byId.has(s.stationuuid))byId.set(s.stationuuid,s)});
+  const raw=[...byId.values()].sort((a,b)=>(b.clickcount||0)-(a.clickcount||0));
   const seen=new Set(),out=[];
   for(const s of raw){
     const url=(s.url_resolved||s.url||'').trim();
@@ -202,7 +209,7 @@ async function loadLang(k){
       sub:[tags,s.country].filter(Boolean).join(', ')||'Live radio',kbps:s.bitrate||0});
     if(out.length>=90)break;
   }
-  cache[k]=out;store.set('c_'+k,{t:Date.now(),d:out});
+  cache[k]=out;store.set('c2_'+k,{t:Date.now(),d:out});
   return out;
 }
 
@@ -333,7 +340,7 @@ if('mediaSession' in navigator){try{
 /* Events */
 $('langs').addEventListener('click',e=>{const b=e.target.closest('.lang');if(!b)return;b.dataset.k==='__fav'?showFavs():showLang(b.dataset.k)});
 $('grid').addEventListener('click',e=>{
-  if(e.target.closest('#retry')){delete cache[lang];store.set('c_'+lang,null);showLang(lang);return}
+  if(e.target.closest('#retry')){delete cache[lang];store.set('c2_'+lang,null);showLang(lang);return}
   const b=e.target.closest('.st');if(!b)return;const s=list[+b.dataset.i];
   if(cur&&s.id===cur.id&&!audio.paused)return;s.bad=false;play(s);
 });
