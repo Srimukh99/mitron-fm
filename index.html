@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f1328">
+<title>Mitron FM</title>
+<meta name="description" content="Desi radio for your car — Telugu, Hindi, Tamil and 12 more languages, live.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Hanken+Grotesk:wght@400;500;600&family=Noto+Sans+Telugu:wght@500&family=Noto+Sans+Devanagari:wght@500&family=Noto+Sans+Tamil:wght@500&family=Noto+Sans+Malayalam:wght@500&family=Noto+Sans+Kannada:wght@500&family=Noto+Sans+Gurmukhi:wght@500&family=Noto+Sans+Bengali:wght@500&family=Noto+Sans+Gujarati:wght@500&family=Noto+Sans+Oriya:wght@500&family=Noto+Naskh+Arabic:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Concept: a valve-radio tuning dial reimagined for a car screen.
+   Indigo night (neel) with a single brass accent. Fraunces for names, Hanken Grotesk for interface.
+   One memorable element: the brass needle gliding along the dial as you change stations.
+   Everything else stays quiet: flat surfaces, no shadows-as-decoration, generous space, large targets. */
+:root{
+  --night:#0f1328;--deep:#151a36;--raise:#1c2244;--rule:#2a3160;
+  --ivory:#efe9dc;--haze:#9298b8;--brass:#d6a957;--brass-lo:#8a6d38;
+  --indic:"Noto Sans Telugu","Noto Sans Devanagari","Noto Sans Tamil","Noto Sans Malayalam","Noto Sans Kannada","Noto Sans Gurmukhi","Noto Sans Bengali","Noto Sans Gujarati","Noto Sans Oriya","Noto Naskh Arabic";
+  --ui:"Hanken Grotesk",var(--indic),system-ui,sans-serif;
+  --serif:"Fraunces",var(--indic),Georgia,serif;
+  --rail:300px;--dock:176px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--night);color:var(--ivory);font:17px/1.45 var(--ui);overflow:hidden;user-select:none;
+  display:grid;grid-template-columns:var(--rail) minmax(0,1fr);grid-template-rows:minmax(0,1fr) var(--dock);grid-template-areas:"rail main" "dock dock"}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+button:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:12px}
+
+/* Rail */
+.rail{grid-area:rail;display:flex;flex-direction:column;border-right:1px solid var(--rule);background:var(--deep);min-height:0}
+.brand{display:flex;align-items:center;gap:12px;padding:28px 28px 22px}
+.brand svg{width:30px;height:30px;flex:none}
+.brand span{font:500 26px/1 var(--serif);letter-spacing:-.01em}
+.langs{flex:1;overflow-y:auto;padding:4px 14px 24px;scrollbar-width:none}
+.langs::-webkit-scrollbar{display:none}
+.lang{display:flex;align-items:baseline;justify-content:space-between;gap:12px;width:100%;padding:14px 16px 14px 22px;border-radius:12px;position:relative;text-align:left;min-height:62px}
+.lang .n{font:500 23px/1.3 var(--indic),var(--ui);color:var(--ivory)}
+.lang .e{font-size:15px;color:var(--haze)}
+.lang::before{content:"";position:absolute;left:8px;top:50%;width:4px;height:4px;border-radius:50%;background:var(--brass);transform:translateY(-50%) scale(0);transition:transform .25s}
+.lang[aria-current=true]{background:var(--raise)}
+.lang[aria-current=true]::before{transform:translateY(-50%) scale(1.5)}
+.lang[aria-current=true] .e{color:var(--brass)}
+.lang.fav{margin-bottom:10px}
+.lang.fav .n{font:500 19px/1.3 var(--ui)}
+.lang.fav svg{width:16px;height:16px;fill:var(--brass);margin-right:8px;vertical-align:-2px}
+.sep{height:1px;background:var(--rule);margin:0 16px 10px}
+
+/* Main */
+main{grid-area:main;overflow-y:auto;padding:30px clamp(20px,3vw,44px) 40px;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:0 0 22px}
+.head h1{margin:0;font:400 44px/1.05 var(--serif);letter-spacing:-.02em;text-wrap:balance}
+.head p{margin:0;color:var(--haze);font-size:16px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.st{display:flex;align-items:center;gap:16px;padding:14px 16px 14px 14px;border-radius:16px;background:var(--deep);text-align:left;min-height:92px;position:relative;box-shadow:inset 0 0 0 1px transparent;transition:box-shadow .2s,background .2s}
+.st:active{background:var(--raise)}
+.st.on{background:var(--raise);box-shadow:inset 0 0 0 1px var(--brass-lo)}
+.st.bad{opacity:.38}
+.art{flex:none;width:62px;height:62px;border-radius:12px;background:var(--raise);display:grid;place-items:center;overflow:hidden;font:500 26px/1 var(--serif);color:var(--brass)}
+.st.on .art{background:var(--night)}
+.art img{width:100%;height:100%;object-fit:cover;background:#f4f1ea}
+.st .t{display:block;font-weight:600;font-size:18px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.st .s{display:block;font-size:14px;color:var(--haze);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.st .mark{position:absolute;top:12px;right:14px;width:14px;height:14px;fill:var(--brass)}
+.lvl{position:absolute;right:16px;bottom:14px;display:none;gap:3px;align-items:flex-end;height:14px}
+.st.on .lvl{display:flex}
+.lvl i{width:3px;height:4px;border-radius:2px;background:var(--brass);animation:lv 1.1s ease-in-out infinite}
+.lvl i:nth-child(2){animation-delay:-.35s}.lvl i:nth-child(3){animation-delay:-.7s}
+body.idle .lvl i{animation-play-state:paused}
+@keyframes lv{0%,100%{height:4px}50%{height:14px}}
+.note{grid-column:1/-1;padding:64px 8px;color:var(--haze);font-size:19px;max-width:46ch}
+.note b{display:block;font:400 28px/1.2 var(--serif);color:var(--ivory);margin-bottom:8px}
+.note button{margin-top:22px;padding:14px 26px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--brass);color:var(--brass);font-weight:600;min-height:52px}
+.skel{height:92px;border-radius:16px;background:linear-gradient(90deg,var(--deep) 0,var(--raise) 50%,var(--deep) 100%);background-size:200% 100%;animation:sk 1.4s linear infinite}
+@keyframes sk{to{background-position:-200% 0}}
+
+/* Dock */
+.dock{grid-area:dock;border-top:1px solid var(--rule);background:var(--deep);display:grid;grid-template-rows:46px minmax(0,1fr);padding:0 clamp(20px,3vw,44px)}
+.dial{position:relative;cursor:pointer;touch-action:none}
+.dial svg{position:absolute;inset:0;width:100%;height:100%}
+.needle{position:absolute;top:6px;bottom:2px;width:2px;margin-left:-1px;background:var(--brass);border-radius:2px;left:0;opacity:0;transition:left .7s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.needle::after{content:"";position:absolute;bottom:-3px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:var(--brass)}
+.needle.show{opacity:1}
+.bar{display:flex;align-items:center;gap:20px;padding-bottom:10px}
+.bar .art{width:84px;height:84px;border-radius:16px;font-size:34px}
+.np{flex:1}
+.np .t{font:400 32px/1.1 var(--serif);letter-spacing:-.015em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np .s{font-size:15px;color:var(--haze);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}
+.np .s em{font-style:normal;color:var(--brass)}
+.ctl{display:flex;align-items:center;gap:14px}
+.cb{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--rule);transition:transform .12s,box-shadow .2s}
+.cb svg{width:26px;height:26px;fill:var(--ivory)}
+.cb:active{transform:scale(.93)}
+.cb.fv[aria-pressed=true]{box-shadow:inset 0 0 0 1px var(--brass-lo)}
+.cb.fv[aria-pressed=true] svg{fill:var(--brass)}
+.cb.go{width:92px;height:92px;background:var(--ivory);box-shadow:none}
+.cb.go svg{width:34px;height:34px;fill:var(--night)}
+.cb.go.load svg{animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+@media(max-width:900px){
+  :root{--dock:220px}
+  body{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) var(--dock);grid-template-areas:"rail" "main" "dock"}
+  .rail{border-right:0;border-bottom:1px solid var(--rule)}
+  .brand{padding:18px 20px 8px}
+  .langs{display:flex;overflow-x:auto;overflow-y:hidden;gap:6px;padding:6px 14px 14px}
+  .lang{flex:none;width:auto;flex-direction:column;gap:0;padding:10px 16px;min-height:0}
+  .lang::before{display:none}.sep{display:none}.lang.fav{margin:0}
+  .head h1{font-size:34px}
+  .bar{flex-wrap:wrap;gap:12px}.bar .art{width:60px;height:60px}.np{flex-basis:calc(100% - 76px)}.np .t{font-size:24px}
+  .ctl{width:100%;justify-content:space-between}.cb{width:60px;height:60px}.cb.go{width:78px;height:78px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="idle">
+<aside class="rail">
+  <div class="brand">
+    <svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#d6a957" stroke-width="1.2"/><path d="M15 4.5v3M15 22.5v3M4.5 15h3M22.5 15h3M7.6 7.6l2.1 2.1M20.3 20.3l2.1 2.1M22.4 7.6l-2.1 2.1M9.7 20.3l-2.1 2.1" stroke="#8a6d38" stroke-width="1.2" stroke-linecap="round"/><line x1="15" y1="15" x2="20.5" y2="8.5" stroke="#d6a957" stroke-width="1.6" stroke-linecap="round"/><circle cx="15" cy="15" r="2" fill="#d6a957"/></svg>
+    <span>Mitron FM</span>
+  </div>
+  <nav class="langs" id="langs" aria-label="Languages"></nav>
+</aside>
+
+<main id="main">
+  <div class="head"><h1 id="title">Stations</h1><p id="count"></p></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<section class="dock" aria-label="Now playing">
+  <div class="dial" id="dial" role="slider" aria-label="Tuning dial" tabindex="0"><svg id="scale" aria-hidden="true"></svg><div class="needle" id="needle"></div></div>
+  <div class="bar">
+    <div class="art" id="pArt">
+      <svg viewBox="0 0 24 24" width="30" height="30" fill="#8a6d38" aria-hidden="true"><path d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3z"/></svg>
+    </div>
+    <div class="np">
+      <div class="t" id="pName">Choose a station</div>
+      <div class="s" id="pSub">Pick a language, then tap any station</div>
+    </div>
+    <div class="ctl">
+      <button class="cb fv" id="bFav" aria-label="Save to favourites" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z"/></svg></button>
+      <button class="cb" id="bPrev" aria-label="Previous station"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+      <button class="cb go" id="bPlay" aria-label="Play"><svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg></button>
+      <button class="cb" id="bNext" aria-label="Next station"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zM16 6h2v12h-2z"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+{
+const LANGS=[
+  {k:'telugu',n:'తెలుగు',e:'Telugu'},{k:'hindi',n:'हिन्दी',e:'Hindi'},{k:'tamil',n:'தமிழ்',e:'Tamil'},
+  {k:'malayalam',n:'മലയാളം',e:'Malayalam'},{k:'kannada',n:'ಕನ್ನಡ',e:'Kannada'},{k:'punjabi',n:'ਪੰਜਾਬੀ',e:'Punjabi'},
+  {k:'marathi',n:'मराठी',e:'Marathi'},{k:'bengali',n:'বাংলা',e:'Bengali'},{k:'gujarati',n:'ગુજરાતી',e:'Gujarati'},
+  {k:'urdu',n:'اردو',e:'Urdu'},{k:'odia',n:'ଓଡ଼ିଆ',e:'Odia'},{k:'bhojpuri',n:'भोजपुरी',e:'Bhojpuri'},
+  {k:'konkani',n:'कोंकणी',e:'Konkani'},{k:'assamese',n:'অসমীয়া',e:'Assamese'},{k:'sanskrit',n:'संस्कृतम्',e:'Devotional'}
+];
+const MIRRORS=['https://de1.api.radio-browser.info','https://de2.api.radio-browser.info','https://fi1.api.radio-browser.info','https://nl1.api.radio-browser.info','https://at1.api.radio-browser.info','https://all.api.radio-browser.info'];
+const ICON={play:'<path d="M8 5v14l11-7z"/>',pause:'<path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/>',load:'<path d="M12 4a8 8 0 1 0 8 8h-2.2A5.8 5.8 0 1 1 12 6.2z"/>'};
+const STAR='<svg class="mark" viewBox="0 0 24 24" aria-label="Favourite"><path d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z"/></svg>';
+const NOTE='<svg viewBox="0 0 24 24" width="30" height="30" fill="#8a6d38" aria-hidden="true"><path d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3z"/></svg>';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem('dr_'+k);return v?JSON.parse(v):d}catch{return d}},set(k,v){try{localStorage.setItem('dr_'+k,JSON.stringify(v))}catch{}}};
+
+const audio=$('audio');
+let lang=store.get('lang','telugu'),view='all',list=[],favs=store.get('favs',{}),cur=null,hls=null,mirror=store.get('mirror',null),skips=0,stallT=null,wantPlay=false;
+const cache={};
+
+async function api(path){
+  const order=[...new Set([mirror,...[...MIRRORS].sort(()=>Math.random()-.5)].filter(Boolean))];
+  for(const m of order){
+    try{
+      const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),7000);
+      const r=await fetch(m+path,{signal:ctl.signal});clearTimeout(t);
+      if(!r.ok)continue;
+      const j=await r.json();mirror=m;store.set('mirror',m);return j;
+    }catch(e){}
+  }
+  throw new Error('unreachable');
+}
+
+async function loadLang(k){
+  if(cache[k])return cache[k];
+  const saved=store.get('c_'+k,null);
+  if(saved&&Date.now()-saved.t<6*3600e3){cache[k]=saved.d;return saved.d}
+  const raw=await api(`/json/stations/search?language=${encodeURIComponent(k)}&hidebroken=true&order=clickcount&reverse=true&limit=250`);
+  const seen=new Set(),out=[];
+  for(const s of raw){
+    const url=(s.url_resolved||s.url||'').trim();
+    if(!/^https:\/\//i.test(url))continue; // Tesla's browser blocks insecure audio on a secure page
+    const key=(s.name||'').trim().toLowerCase();
+    if(!key||seen.has(key))continue;seen.add(key);
+    const tags=(s.tags||'').split(',').map(t=>t.trim()).filter(t=>t&&t.toLowerCase()!==k).slice(0,2).join(', ');
+    out.push({id:s.stationuuid,name:s.name.trim(),url,hls:s.hls==1||/\.m3u8(\?|$)/i.test(url),
+      icon:/^https:\/\//i.test(s.favicon||'')?s.favicon:'',
+      sub:[tags,s.country].filter(Boolean).join(', ')||'Live radio',kbps:s.bitrate||0});
+    if(out.length>=90)break;
+  }
+  cache[k]=out;store.set('c_'+k,{t:Date.now(),d:out});
+  return out;
+}
+
+function art(s){
+  const letter=esc(((s.name||'').match(/[A-Za-z0-9ऀ-෿]/)||['·'])[0].toUpperCase());
+  return s.icon?`<img src="${esc(s.icon)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-l="${letter}">`:letter;
+}
+function fixImgs(root){root.querySelectorAll('img').forEach(im=>im.onerror=()=>{im.parentNode.textContent=im.dataset.l||'·'})}
+
+function renderLangs(){
+  const n=Object.keys(favs).length;
+  $('langs').innerHTML=
+    `<button class="lang fav" data-k="__fav" aria-current="${view==='fav'}"><span class="n"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z"/></svg>Favourites</span><span class="e">${n||''}</span></button><div class="sep"></div>`+
+    LANGS.map(l=>`<button class="lang" data-k="${l.k}" aria-current="${view==='all'&&l.k===lang}"><span class="n">${l.n}</span><span class="e">${l.e}</span></button>`).join('');
+}
+
+function renderGrid(state){
+  const g=$('grid');
+  if(state==='loading'){$('count').textContent='';g.innerHTML='<div class="skel"></div>'.repeat(9);return}
+  if(state==='error'){$('count').textContent='';g.innerHTML='<div class="note"><b>The station list didn’t load</b>Check the car’s internet connection, then try again.<br><button id="retry">Try again</button></div>';return}
+  if(!list.length){
+    $('count').textContent='';
+    g.innerHTML=view==='fav'
+      ?'<div class="note"><b>No favourites yet</b>While a station is playing, tap the star to keep it here.</div>'
+      :'<div class="note"><b>No stations available right now</b>None of this language’s stations offer a secure stream the car can play. Try another language, or check again later.<br><button id="retry">Check again</button></div>';
+    drawScale();return;
+  }
+  $('count').textContent=list.length+(list.length===1?' station':' stations');
+  g.innerHTML=list.map((s,i)=>`<button class="st${cur&&cur.id===s.id?' on':''}${s.bad?' bad':''}" data-i="${i}">
+    <span class="art">${art(s)}</span><span><span class="t">${esc(s.name)}</span><span class="s">${esc(s.sub)}</span></span>
+    ${favs[s.id]?STAR:''}<span class="lvl" aria-hidden="true"><i></i><i></i><i></i></span></button>`).join('');
+  fixImgs(g);drawScale();moveNeedle();
+}
+
+async function showLang(k){
+  lang=k;view='all';store.set('lang',k);renderLangs();
+  const L=LANGS.find(l=>l.k===k);$('title').textContent=L?L.e:'Stations';
+  list=[];renderGrid('loading');$('main').scrollTop=0;
+  try{const d=await loadLang(k);if(lang===k&&view==='all'){list=d;renderGrid()}}
+  catch(e){if(lang===k)renderGrid('error')}
+}
+function showFavs(){view='fav';renderLangs();$('title').textContent='Favourites';list=Object.values(favs);renderGrid();$('main').scrollTop=0}
+
+/* Dial */
+function drawScale(){
+  const svg=$('scale'),W=svg.clientWidth,H=svg.clientHeight;if(!W)return;
+  const n=Math.max(list.length,1),ticks=Math.min(Math.max(n*2,60),180);let p='';
+  for(let i=0;i<=ticks;i++){const x=8+(W-16)*i/ticks,major=i%10===0;p+=`<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${major?14:22}" y2="34" stroke="${major?'#4a5390':'#2f3768'}" stroke-width="1"/>`}
+  let dots='';list.forEach((s,i)=>{const x=pos(i,W);dots+=`<circle cx="${x.toFixed(1)}" cy="40" r="1.6" fill="${s.bad?'#2f3768':'#8a6d38'}"/>`});
+  svg.innerHTML=p+dots;
+}
+function pos(i,W){const n=list.length;return n<2?W/2:8+(W-16)*i/(n-1)}
+function moveNeedle(){
+  const nd=$('needle'),W=$('dial').clientWidth,i=cur?list.findIndex(s=>s.id===cur.id):-1;
+  if(i<0){nd.classList.remove('show');return}
+  nd.style.left=pos(i,W)+'px';nd.classList.add('show');
+}
+function tuneAt(clientX){
+  if(!list.length)return;const r=$('dial').getBoundingClientRect();
+  const f=Math.min(Math.max((clientX-r.left-8)/(r.width-16),0),1);const i=Math.round(f*(list.length-1));
+  if(!cur||list[i].id!==cur.id){list[i].bad=false;play(list[i]);reveal(i)}
+}
+new ResizeObserver(()=>{drawScale();moveNeedle()}).observe($('dial'));
+
+/* Playback */
+function setState(st,msg){
+  $('playIcon').innerHTML=ICON[st==='play'?'pause':st==='load'?'load':'play'];
+  $('bPlay').classList.toggle('load',st==='load');$('bPlay').setAttribute('aria-label',st==='play'?'Pause':'Play');
+  document.body.classList.toggle('idle',st!=='play');
+  if(cur)$('pSub').innerHTML=(msg?`<em>${esc(msg)}</em>`:'')+(msg&&cur.sub?', ':'')+esc(cur.sub||'');
+}
+function stopStream(){clearTimeout(stallT);if(hls){hls.destroy();hls=null}audio.pause();audio.removeAttribute('src');audio.load()}
+function loadHlsLib(){return window.Hls?Promise.resolve():new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+
+function showNow(s){
+  $('pName').textContent=s.name;$('pArt').innerHTML=art(s);fixImgs($('pArt'));
+  $('bFav').setAttribute('aria-pressed',!!favs[s.id]);$('bFav').setAttribute('aria-label',favs[s.id]?'Remove from favourites':'Save to favourites');
+}
+
+async function play(s,auto){
+  if(!s)return;if(!auto)skips=0;
+  cur=s;wantPlay=true;stopStream();showNow(s);setState('load','Tuning');markOn();moveNeedle();
+  if('mediaSession' in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:s.name,artist:'Mitron FM',album:s.sub||'',artwork:s.icon?[{src:s.icon,sizes:'256x256'}]:[]})}catch{}}
+  fetch((mirror||MIRRORS[0])+'/json/url/'+encodeURIComponent(s.id)).catch(()=>{});
+  stallT=setTimeout(()=>fail(s),15000);
+  try{
+    if(s.hls&&!audio.canPlayType('application/vnd.apple.mpegurl')){
+      await loadHlsLib();if(cur!==s)return;
+      if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)fail(s)});hls.loadSource(s.url);hls.attachMedia(audio)}
+      else audio.src=s.url;
+    }else audio.src=s.url;
+    await audio.play();
+  }catch(e){
+    if(cur!==s)return;
+    if(e&&e.name==='NotAllowedError'){clearTimeout(stallT);wantPlay=false;setState('pause','Tap play to start')}
+    else fail(s);
+  }
+}
+function fail(s){
+  if(cur!==s)return;clearTimeout(stallT);s.bad=true;drawScale();
+  if(skips<6&&view==='all'&&list.length>1){skips++;step(1,true)}
+  else{stopStream();wantPlay=false;setState('pause','Station is off air');markOn()}
+}
+function markOn(){document.querySelectorAll('.st').forEach(el=>{const s=list[+el.dataset.i];el.classList.toggle('on',!!(cur&&s&&s.id===cur.id));el.classList.toggle('bad',!!(s&&s.bad))})}
+function reveal(i){const el=document.querySelector(`.st[data-i="${i}"]`);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'})}
+function step(d,auto){
+  if(!list.length)return;let i=cur?list.findIndex(s=>s.id===cur.id):-1;
+  for(let n=0;n<list.length;n++){i=(i+d+list.length)%list.length;if(!auto||!list[i].bad)break}
+  play(list[i],auto);reveal(i);
+}
+function toggle(){
+  if(!cur){if(list.length){play(list[0]);reveal(0)}return}
+  if(!audio.src)return play(cur);
+  if(audio.paused){wantPlay=true;audio.play().catch(()=>play(cur))}else{wantPlay=false;audio.pause()}
+}
+
+audio.addEventListener('playing',()=>{clearTimeout(stallT);skips=0;if(cur)cur.bad=false;setState('play',cur&&cur.kbps?`Live, ${cur.kbps} kbps`:'Live');markOn();drawScale()});
+audio.addEventListener('pause',()=>{if(!wantPlay)setState('pause','Paused')});
+audio.addEventListener('waiting',()=>{if(wantPlay)setState('load','Buffering')});
+audio.addEventListener('error',()=>{if(cur&&wantPlay&&!hls)fail(cur)});
+audio.addEventListener('stalled',()=>{if(cur&&wantPlay){clearTimeout(stallT);const s=cur;stallT=setTimeout(()=>{if(audio.paused||audio.readyState<3)fail(s)},15000)}});
+
+if('mediaSession' in navigator){try{
+  navigator.mediaSession.setActionHandler('play',toggle);navigator.mediaSession.setActionHandler('pause',toggle);
+  navigator.mediaSession.setActionHandler('nexttrack',()=>step(1));navigator.mediaSession.setActionHandler('previoustrack',()=>step(-1));
+}catch{}}
+
+/* Events */
+$('langs').addEventListener('click',e=>{const b=e.target.closest('.lang');if(!b)return;b.dataset.k==='__fav'?showFavs():showLang(b.dataset.k)});
+$('grid').addEventListener('click',e=>{
+  if(e.target.closest('#retry')){delete cache[lang];store.set('c_'+lang,null);showLang(lang);return}
+  const b=e.target.closest('.st');if(!b)return;const s=list[+b.dataset.i];
+  if(cur&&s.id===cur.id&&!audio.paused)return;s.bad=false;play(s);
+});
+$('dial').addEventListener('pointerdown',e=>tuneAt(e.clientX));
+$('dial').addEventListener('keydown',e=>{if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});
+$('bPlay').onclick=toggle;$('bNext').onclick=()=>step(1);$('bPrev').onclick=()=>step(-1);
+$('bFav').onclick=()=>{
+  if(!cur)return;if(favs[cur.id])delete favs[cur.id];else favs[cur.id]={...cur,bad:false};
+  store.set('favs',favs);showNow(cur);if(view==='fav')list=Object.values(favs);renderLangs();renderGrid();markOn();
+};
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();toggle()}});
+window.addEventListener('pagehide',()=>{if(cur)store.set('last',{...cur,bad:false})});
+
+const last=store.get('last',null);
+if(last){cur=last;showNow(last);$('pSub').innerHTML='<em>Tap play to resume</em>, '+esc(last.sub||'')}
+showLang(lang);
+}
+</script>
+</body>
+</html>
